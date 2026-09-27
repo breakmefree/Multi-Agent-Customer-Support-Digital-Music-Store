@@ -1,4 +1,23 @@
-# Byte-compiled / optimized / DLL files
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Virtual env
+.venv/
+
+# Environment and secrets
+.env
+
+# Local caches and data
+.cache/
+
+# OS/editor
+.DS_Store
+.vscode/
+*.swp
+*.swo# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
