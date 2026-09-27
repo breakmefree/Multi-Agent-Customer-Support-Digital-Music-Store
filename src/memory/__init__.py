@@ -1,0 +1,1 @@
+"""Customer preference memory."""
