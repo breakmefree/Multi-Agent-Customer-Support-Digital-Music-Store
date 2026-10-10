@@ -377,7 +377,8 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 cp .env.example .env
-python app.py
+# Headless demo (requires LLM env; otherwise supervisor falls back to rule-based, but sub-agents still need LLM)
+python app.py --demo
 ```
 
 Open the local Gradio URL printed by the application.

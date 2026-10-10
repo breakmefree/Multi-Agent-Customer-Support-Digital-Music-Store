@@ -48,7 +48,7 @@ def inject_verified_customer(state: SupportState, customer_id: int) -> SupportSt
     - Updates `state['verified_customer_id']` and clears `verification_pending`.
     """
     msg = make_verified_customer_system_message(customer_id)
-    state["messages"].append(msg)
+    state.setdefault("messages", []).append(msg)
     state["verified_customer_id"] = int(customer_id)
     state["verification_pending"] = False
     return state
@@ -63,6 +63,6 @@ def request_verification(state: SupportState, prompt: str | None = None) -> Supp
         "type": VERIFICATION_PROMPT_TAG,
         "message": prompt or VERIFICATION_FALLBACK_PROMPT,
     }
-    state["messages"].append(SystemMessage(content=json.dumps(payload, separators=(",", ":"))))
+    state.setdefault("messages", []).append(SystemMessage(content=json.dumps(payload, separators=(",", ":"))))
     state["verification_pending"] = True
     return state

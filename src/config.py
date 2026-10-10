@@ -11,11 +11,12 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class Settings:
-    llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL", ""))
-    llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
-    llm_base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", ""))
+    # Prefer LLM_* variables; fall back to common OpenAI-style names when absent
+    llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL") or os.getenv("MODEL_NAME", ""))
+    llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY", ""))
+    llm_base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_API_BASE", ""))
     llm_temperature: float = field(
-        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0"))
+        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE") or os.getenv("TEMPERATURE", "0"))
     )
     database_cache_path: str = field(
         default_factory=lambda: os.getenv(

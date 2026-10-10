@@ -18,8 +18,9 @@ CATALOG_GROUNDING_PROMPT = (
 	"2) Exact number quoting: Quote exact counts/IDs/prices/dates as given by tools.\n"
 	"3) Honest failures: If tools return nothing, say so clearly (e.g., 'No matches found').\n"
 	"4) Scope boundaries: Defer or decline requests outside music catalog scope.\n"
-	"5) No memory-based answers: Do not infer or recall details not present in tool output.\n"
-	"6) Truncation transparency: If sampling/truncation occurs, say so and include totals.\n\n"
+	"5) Saved preferences: You may use the tagged customer music preferences to prioritize discovery, but not as catalog facts.\n"
+	"6) No memory-based answers: Do not infer or recall catalog details not present in tool output.\n"
+	"7) Truncation transparency: If sampling/truncation occurs, say so and include totals.\n\n"
 	"Available tools (choose the best match):\n"
 	"- search_albums_by_artist(artist_name, sample_limit?)\n"
 	"- search_tracks_by_artist(artist_name, sample_limit?)\n"
@@ -48,7 +49,13 @@ INVOICE_GROUNDING_PROMPT = (
 	"- get_customer_purchased_tracks(verified_customer_id)\n"
 	"- get_invoice_support_rep(verified_customer_id, invoice_id)\n"
 	"- get_invoice_line_items(verified_customer_id, invoice_id)\n\n"
-	"Before your first tool call, extract verified_customer_id from the trusted SystemMessage. If absent, ask for ID/email/phone and stop. When calling tools, pass the numeric verified ID explicitly."
+	"Before your first tool call, extract verified_customer_id from the trusted SystemMessage. If absent, ask for ID/email/phone and stop. When calling tools, pass the numeric verified ID explicitly.\n\n"
+	"Action requirements:\n"
+	"- If the user asks for \"invoices\" or account summary, your FIRST action MUST be a tool call to get_customer_invoices(verified_customer_id).\n"
+	"- If the user asks for \"purchased tracks\", FIRST call get_customer_purchased_tracks(verified_customer_id).\n"
+	"- For \"support rep\" of a specific invoice, FIRST call get_invoice_support_rep(verified_customer_id, invoice_id).\n"
+	"- For \"line items\" of an invoice, FIRST call get_invoice_line_items(verified_customer_id, invoice_id).\n"
+	"Do not claim to have provided details unless you actually include faithful facts derived from the tool output or report an explicit empty result."
 )
 
 SUPERVISOR_ROUTING_PROMPT = (
