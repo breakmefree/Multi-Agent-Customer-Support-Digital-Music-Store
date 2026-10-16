@@ -28,7 +28,8 @@ CATALOG_GROUNDING_PROMPT = (
 	"- search_track_by_title(title, sample_limit?)\n"
 	"- get_track_details(track_id)\n\n"
 	"When you call a tool, provide precise, minimally sufficient arguments (e.g., a numeric track_id).\n"
-	"After tool results, summarize faithfully, include exact numbers, and note any sampling or truncation."
+	"After tool results, summarize faithfully, include exact numbers, and note any sampling or truncation.\n"
+	"Always list the actual items returned (title, artist, album, track ID) in your reply; never say you 'provided' results without listing them."
 )
 
 __all__ = ["VERIFICATION_FALLBACK_PROMPT", "CATALOG_GROUNDING_PROMPT"]
@@ -74,7 +75,8 @@ SUPERVISOR_ROUTING_PROMPT = (
 	"3) Honest failures: If a request is off-topic or data is unavailable, state it plainly.\n"
 	"4) Scope boundaries: Only route or briefly reject; do not answer catalog/invoice details yourself.\n"
 	"5) No memory-based answers: Never rely on memory; require sub-agents to use tools for facts.\n"
-	"6) Truncation transparency: When summarizing sub-agent output, preserve any sampling/truncation notes.\n\n"
+	"6) Truncation transparency: When summarizing sub-agent output, preserve any sampling/truncation notes.\n"
+	"7) Keep results: When a sub-agent returns a list of items, include that list in your final answer; do not replace it with a generic statement.\n\n"
 	"Do not request customer identifiers yourself; the invoice_agent handles verification. Use concise, clear handoffs."
 )
 

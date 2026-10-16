@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy import Engine
 
-from src.database.queries import execute_query
+from src.database.queries import execute_query, like_contains
 
 __all__ = [
 	"search_albums_by_artist",
@@ -62,7 +62,7 @@ def search_albums_by_artist(
 
 	limit = _coerce_positive_int(sample_limit)
 
-	params = {"pattern": f"%{name}%"}
+	params = {"pattern": like_contains(name)}
 
 	total_rows = json.loads(
 		execute_query(
@@ -71,7 +71,7 @@ def search_albums_by_artist(
 			SELECT COUNT(*) AS total
 			FROM Album AS a
 			JOIN Artist AS r ON r.ArtistId = a.ArtistId
-			WHERE LOWER(r.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(r.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 			""",
 			params,
 		)
@@ -87,7 +87,7 @@ def search_albums_by_artist(
 			r.Name     AS artist
 		FROM Album AS a
 		JOIN Artist AS r ON r.ArtistId = a.ArtistId
-		WHERE LOWER(r.Name) LIKE LOWER(:pattern)
+		WHERE LOWER(r.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 		ORDER BY r.Name ASC, a.Title ASC
 		"""
 		+ (" LIMIT :limit" if limit is not None else "")
@@ -136,7 +136,7 @@ def search_tracks_by_artist(
 	if limit > 20:
 		limit = 20
 
-	params = {"pattern": f"%{name}%"}
+	params = {"pattern": like_contains(name)}
 
 	total_rows = json.loads(
 		execute_query(
@@ -146,7 +146,7 @@ def search_tracks_by_artist(
 			FROM Track AS t
 			JOIN Album AS a ON a.AlbumId = t.AlbumId
 			JOIN Artist AS r ON r.ArtistId = a.ArtistId
-			WHERE LOWER(r.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(r.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 			""",
 			params,
 		)
@@ -164,7 +164,7 @@ def search_tracks_by_artist(
 		FROM Track AS t
 		JOIN Album AS a ON a.AlbumId = t.AlbumId
 		JOIN Artist AS r ON r.ArtistId = a.ArtistId
-		WHERE LOWER(r.Name) LIKE LOWER(:pattern)
+		WHERE LOWER(r.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 		ORDER BY r.Name ASC, a.Title ASC, t.Name ASC, t.TrackId ASC
 		LIMIT :limit
 	"""
@@ -219,7 +219,7 @@ def browse_tracks_by_genre(
 	if limit > 10:
 		limit = 10
 
-	params = {"pattern": f"%{name}%"}
+	params = {"pattern": like_contains(name)}
 
 	# Total matching tracks for the genre (fuzzy match on genre name)
 	total_rows = json.loads(
@@ -229,7 +229,7 @@ def browse_tracks_by_genre(
 			SELECT COUNT(*) AS total
 			FROM Track AS t
 			JOIN Genre AS g ON g.GenreId = t.GenreId
-			WHERE LOWER(g.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(g.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 			""",
 			params,
 		)
@@ -246,7 +246,7 @@ def browse_tracks_by_genre(
 			JOIN Album AS a ON a.AlbumId = t.AlbumId
 			JOIN Artist AS r ON r.ArtistId = a.ArtistId
 			JOIN Genre  AS g ON g.GenreId = t.GenreId
-			WHERE LOWER(g.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(g.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 			""",
 			params,
 		)
@@ -274,7 +274,7 @@ def browse_tracks_by_genre(
 			JOIN Album AS a ON a.AlbumId = t.AlbumId
 			JOIN Artist AS r ON r.ArtistId = a.ArtistId
 			JOIN Genre  AS g ON g.GenreId = t.GenreId
-			WHERE LOWER(g.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(g.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 		)
 		SELECT track_id, title, album_id, album, artist_id, artist, genre_id, genre
 		FROM ranked
@@ -323,7 +323,7 @@ def search_track_by_title(
 	if limit > 10:
 		limit = 10
 
-	params = {"pattern": f"%{name}%"}
+	params = {"pattern": like_contains(name)}
 
 	total_rows = json.loads(
 		execute_query(
@@ -331,7 +331,7 @@ def search_track_by_title(
 			"""
 			SELECT COUNT(*) AS total
 			FROM Track AS t
-			WHERE LOWER(t.Name) LIKE LOWER(:pattern)
+			WHERE LOWER(t.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 			""",
 			params,
 		)
@@ -349,7 +349,7 @@ def search_track_by_title(
 		FROM Track AS t
 		JOIN Album AS a ON a.AlbumId = t.AlbumId
 		JOIN Artist AS r ON r.ArtistId = a.ArtistId
-		WHERE LOWER(t.Name) LIKE LOWER(:pattern)
+		WHERE LOWER(t.Name) LIKE LOWER(:pattern) ESCAPE '\\'
 		ORDER BY t.Name ASC, r.Name ASC, t.TrackId ASC
 		LIMIT :limit
 	"""

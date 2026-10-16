@@ -48,6 +48,35 @@ def _summarize_tool_outputs(messages: List[Any]) -> str:
 			except Exception:
 				continue
 			# Heuristics by shape
+			if isinstance(payload, dict) and "tracks" in payload and "total" in payload:
+				total = payload.get("total", 0)
+				returned = payload.get("returned", len(payload.get("tracks") or []))
+				header = f"Tracks (total {total}, showing {returned}{', sampled' if payload.get('sampled') else ''}):"
+				if not payload.get("tracks"):
+					return "No matching tracks found."
+				lines = [header]
+				for t in payload["tracks"]:
+					genre = f" [{t['genre']}]" if t.get("genre") else ""
+					lines.append(f"- {t.get('title')} — {t.get('artist')} (album: {t.get('album')}, track #{t.get('track_id')}){genre}")
+				return "\n".join(lines)
+			if isinstance(payload, dict) and "albums" in payload and "total" in payload:
+				total = payload.get("total", 0)
+				returned = payload.get("returned", len(payload.get("albums") or []))
+				if not payload.get("albums"):
+					return "No matching albums found."
+				lines = [f"Albums (total {total}, showing {returned}{', sampled' if payload.get('sampled') else ''}):"]
+				for a in payload["albums"]:
+					lines.append(f"- {a.get('title')} — {a.get('artist')} (album #{a.get('album_id')})")
+				return "\n".join(lines)
+			if isinstance(payload, dict) and "found" in payload and "track" in payload:
+				t = payload.get("track")
+				if not t:
+					return "No track found with that ID."
+				return (
+					f"Track #{t.get('track_id')}: {t.get('title')} — {t.get('artist')} "
+					f"(album: {t.get('album')}, genre: {t.get('genre')}, price {t.get('unit_price')}, "
+					f"{t.get('milliseconds')} ms)"
+				)
 			if isinstance(payload, dict) and "invoices" in payload and "total" in payload:
 				total = payload.get("total", 0)
 				lines = [f"Invoices (total {total}):"]

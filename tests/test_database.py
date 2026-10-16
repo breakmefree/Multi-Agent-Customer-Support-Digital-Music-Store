@@ -2,8 +2,49 @@
 
 import json
 
+import pytest
+
 from src.database import database_health_check, execute_query, normalize_phone
 from src.database.connection import download_chinook_sql
+from src.tools.catalog import search_albums_by_artist
+
+
+@pytest.mark.parametrize(
+	"sql",
+	[
+		"DROP TABLE Artist",
+		"DELETE FROM Artist",
+		"INSERT INTO Artist (Name) VALUES ('x')",
+		"UPDATE Artist SET Name = 'x'",
+		"SELECT 1; DROP TABLE Artist",
+		"PRAGMA table_info(Artist)",
+		"/* hi */ DELETE FROM Artist",
+		"WITH x AS (SELECT 1) DELETE FROM Artist",
+	],
+)
+def test_execute_query_rejects_writes_and_stacked_statements(database_engine, sql):
+	with pytest.raises(ValueError):
+		execute_query(database_engine, sql)
+
+	assert json.loads(execute_query(database_engine, "SELECT COUNT(*) AS n FROM Artist")) == [{"n": 2}]
+
+
+def test_injection_payload_in_param_is_treated_as_data(database_engine):
+	payload = "AC/DC' OR '1'='1"
+	result = execute_query(
+		database_engine,
+		"SELECT Name FROM Artist WHERE Name = :n",
+		{"n": payload},
+	)
+
+	assert json.loads(result) == []
+
+
+@pytest.mark.parametrize("wildcard", ["%", "_", "A_/DC", "\\"])
+def test_like_wildcards_in_user_input_are_literal(database_engine, wildcard):
+	result = search_albums_by_artist(database_engine, wildcard)
+
+	assert result["total"] == 0
 
 
 def test_basic_select_returns_rows(database_engine):
