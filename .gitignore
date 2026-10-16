@@ -235,3 +235,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Downloaded Chinook SQL must never be committed
+Chinook_Sqlite.sql
